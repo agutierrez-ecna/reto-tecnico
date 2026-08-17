@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reto Técnico</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 p-8 font-sans">
+    <div class="max-w-xl mx-auto bg-white p-6 rounded-xl shadow-md">
+        <h1 class="text-2xl font-bold mb-4 text-slate-800">Procesador de Matrices</h1>
+        
+        <div id="login-section" class="mb-6 border-b pb-6">
+            <h2 class="text-lg font-semibold mb-2">Iniciar Sesión (JWT)</h2>
+            <input type="text" id="username" placeholder="Usuario" class="border p-2 w-full mb-2 rounded" value="admin">
+            <input type="password" id="password" placeholder="Contraseña" class="border p-2 w-full mb-2 rounded" value="123456">
+            <button onclick="login()" class="bg-blue-600 text-white px-4 py-2 rounded w-full hover:bg-blue-700">Obtener Token</button>
+            <p id="token-status" class="text-sm mt-2 font-mono text-slate-500">Estado: No autenticado</p>
+        </div>
+
+        <div id="matrix-section">
+            <h2 class="text-lg font-semibold mb-2">Procesar Matriz</h2>
+            <textarea id="matrix-input" class="border p-2 w-full h-32 font-mono text-sm rounded mb-2">[
+  [1, 2, 3],
+  [4, 5, 6]
+]</textarea>
+            <button onclick="sendMatrix()" class="bg-emerald-600 text-white px-4 py-2 rounded w-full hover:bg-emerald-700">Procesar Matriz</button>
+        </div>
+
+        <div class="mt-6">
+            <h2 class="text-lg font-semibold mb-2">Respuesta:</h2>
+            <pre id="output" class="bg-slate-900 text-emerald-400 p-4 rounded text-xs overflow-x-auto min-h-[100px]">Esperando acción...</pre>
+        </div>
+    </div>
+
+    <script>
+        let jwtToken = "";
+
+        async function login() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            try {
+                const res = await fetch("http://localhost:8080/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+                if (data.token) {
+                    jwtToken = data.token;
+                    document.getElementById("token-status").innerText = "Estado: Autenticado";
+                } else {
+                    alert("Credenciales incorrectas");
+                }
+            } catch (e) { alert("Error conectando al login"); }
+        }
+
+    async function sendMatrix() {
+            const output = document.getElementById("output");
+            
+            let matrix;
+            try {
+                matrix = JSON.parse(document.getElementById("matrix-input").value);
+            } catch (e) {
+                output.innerText = "Error de formato: Revisar la matriz ingresada.";
+                output.classList.replace("text-emerald-400", "text-yellow-400");
+                return;
+            }
+
+            try {
+                const res = await fetch("http://localhost:8080/api/process-matrix", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + jwtToken
+                    },
+                    body: JSON.stringify({ matrix })
+                });
+
+                if (res.status === 401) {
+                    output.innerText = "Error 401: No estás autorizado. Inicia sesión primero.";
+                    output.classList.replace("text-emerald-400", "text-red-400");
+                } else if (!res.ok) {
+                    const errData = await res.json();
+                    output.innerText = `Error del servidor: ${errData.error || "Solicitud incorrecta"}`;
+                    output.classList.replace("text-emerald-400", "text-red-400");
+                } else {
+                    const data = await res.json();
+                    output.innerText = JSON.stringify(data, null, 2);
+                    output.classList.replace("text-red-400", "text-emerald-400");
+                }
+            } catch (e) {
+                output.innerText = "Error de conexión: No se pudo contactar al backend de Go. Asegúrate de que los contenedores estén corriendo.";
+                output.classList.replace("text-emerald-400", "text-red-400");
+            }
+        }</script>
+</body>
+</html>

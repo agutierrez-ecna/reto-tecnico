@@ -1,0 +1,29 @@
+services:
+  node-api:
+    build: ./node-api
+    ports:
+      - "3000:3000"
+    networks:
+      - reto-tecnico
+
+  go-api:
+    build: ./go-api
+    ports:
+      - "8080:8080"
+    networks:
+      - reto-tecnico
+    depends_on:
+      - node-api
+
+  frontend:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+    networks:
+      - reto-tecnico
+
+networks:
+  reto-tecnico:
+    driver: bridge

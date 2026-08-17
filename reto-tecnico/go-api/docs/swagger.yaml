@@ -1,0 +1,42 @@
+basePath: /
+definitions:
+  main.MatrixRequest:
+    properties:
+      matrix:
+        items:
+          items:
+            format: float64
+            type: number
+          type: array
+        type: array
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API que procesa y rota matrices rectangulares.
+  title: API en Go - Interseguro Challenge
+  version: "1.0"
+paths:
+  /process-matrix:
+    post:
+      consumes:
+      - application/json
+      description: Recibe una matriz de números, la rota 90 grados y la reenvía a
+        Node.js
+      parameters:
+      - description: Matriz de entrada
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.MatrixRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Recibe y rota una matriz
+swagger: "2.0"

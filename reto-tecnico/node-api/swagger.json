@@ -1,0 +1,50 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API en Node.js",
+    "version": "1.0.0",
+    "description": "API encargada de calcular estadísticas y validar matrices diagonales."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000"
+    }
+  ],
+  "paths": {
+    "/analyze-matrix": {
+      "post": {
+        "summary": "Analiza la matriz rotada",
+        "description": "Calcula el valor máximo, mínimo, promedio, suma total y verifica si es matriz diagonal.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "rotated_matrix": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "number"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Estadísticas calculadas correctamente"
+          },
+          "400": {
+            "description": "Matriz inválida o vacía"
+          }
+        }
+      }
+    }
+  }
+}
