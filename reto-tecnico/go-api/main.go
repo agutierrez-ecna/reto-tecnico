@@ -147,6 +147,8 @@ func main() {
 
 	app.Use(cors.New())
 
+    app.Static("/", "../frontend")
+
 	app.Get("/swagger/*", fiberSwagger.WrapHandler)
 
 	app.Post("/login", Login)
