@@ -23,6 +23,11 @@ import (
 // @host localhost:8080
 // @BasePath /
 
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Escribe 'Bearer ' seguido de tu token JWT generador en /login (Ejemplo: Bearer eyJhbGci...).
+
 var jwtSecret = []byte("secreto-interseguro")
 
 type Credentials struct {
@@ -93,7 +98,7 @@ func Login(c *fiber.Ctx) error {
 // @Description Recibe una matriz de números, la rota 90 grados y la reenvía a Node.js
 // @Accept json
 // @Produce json
-// @Param Authorization header string true "Token JWT (Bearer <token>)"
+// @Security BearerAuth
 // @Param request body MatrixRequest true "Matriz de entrada"
 // @Success 200 {object} map[string]interface{}
 // @Router /api/process-matrix [post]
@@ -131,7 +136,7 @@ func ProcessMatrixHandler(c *fiber.Ctx) error {
 	json.NewDecoder(resp.Body).Decode(&nodeResult)
 
 	return c.JSON(fiber.Map{
-		"message":         "Procesado exitosamente",
+		"message":        "Procesado exitosamente",
 		"rotated_matrix":  rotated,
 		"node_statistics": nodeResult,
 	})
@@ -156,7 +161,7 @@ func main() {
 		},
 	}))
 	api.Post("/process-matrix", ProcessMatrixHandler)
-	
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"

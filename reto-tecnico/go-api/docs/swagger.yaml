@@ -1,5 +1,12 @@
 basePath: /
 definitions:
+  main.Credentials:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
   main.MatrixRequest:
     properties:
       matrix:
@@ -13,11 +20,11 @@ definitions:
 host: localhost:8080
 info:
   contact: {}
-  description: API que procesa y rota matrices rectangulares.
+  description: API que procesa y rota matrices rectangulares protegida con JWT.
   title: API en Go - Interseguro Challenge
   version: "1.0"
 paths:
-  /process-matrix:
+  /api/process-matrix:
     post:
       consumes:
       - application/json
@@ -38,5 +45,36 @@ paths:
           schema:
             additionalProperties: true
             type: object
-      summary: Recibe y rota una matriz
+      security:
+      - BearerAuth: []
+      summary: Recibe y rota una matriz (Protegido con JWT)
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Autentica al usuario y devuelve un token JWT válido
+      parameters:
+      - description: Credenciales de acceso
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/main.Credentials'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Iniciar sesión para obtener Token JWT
+securityDefinitions:
+  BearerAuth:
+    description: 'Escribe ''Bearer '' seguido de tu token JWT generador en /login
+      (Ejemplo: Bearer eyJhbGci...).'
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

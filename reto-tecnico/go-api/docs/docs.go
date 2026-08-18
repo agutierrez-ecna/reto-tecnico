@@ -15,8 +15,13 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/process-matrix": {
+        "/api/process-matrix": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Recibe una matriz de números, la rota 90 grados y la reenvía a Node.js",
                 "consumes": [
                     "application/json"
@@ -24,7 +29,7 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Recibe y rota una matriz",
+                "summary": "Recibe y rota una matriz (Protegido con JWT)",
                 "parameters": [
                     {
                         "description": "Matriz de entrada",
@@ -46,9 +51,54 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/login": {
+            "post": {
+                "description": "Autentica al usuario y devuelve un token JWT válido",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Iniciar sesión para obtener Token JWT",
+                "parameters": [
+                    {
+                        "description": "Credenciales de acceso",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.Credentials"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "main.Credentials": {
+            "type": "object",
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
         "main.MatrixRequest": {
             "type": "object",
             "properties": {
@@ -64,6 +114,14 @@ const docTemplate = `{
                 }
             }
         }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "Escribe 'Bearer ' seguido de tu token JWT generador en /login (Ejemplo: Bearer eyJhbGci...).",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
     }
 }`
 
@@ -74,7 +132,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/",
 	Schemes:          []string{},
 	Title:            "API en Go - Interseguro Challenge",
-	Description:      "API que procesa y rota matrices rectangulares.",
+	Description:      "API que procesa y rota matrices rectangulares protegida con JWT.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",
