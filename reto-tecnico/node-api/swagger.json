@@ -7,7 +7,12 @@
   },
   "servers": [
     {
-      "url": "http://localhost:3000"
+      "url": "https://reto-tecnico-node-1021109336611.europe-west1.run.app",
+      "description": "Servidor en la nube (GCP Cloud Run)"
+    },
+    {
+      "url": "http://localhost:3000",
+      "description": "Servidor local"
     }
   ],
   "paths": {

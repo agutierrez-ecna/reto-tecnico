@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	_ "go-api/docs"
@@ -114,7 +115,10 @@ func ProcessMatrixHandler(c *fiber.Ctx) error {
 	payload := MatrixResponse{RotatedMatrix: rotated}
 	jsonPayload, _ := json.Marshal(payload)
 
-	nodeServiceURL := "http://node-api:3000/analyze-matrix"
+	nodeServiceURL := os.Getenv("NODE_SERVICE_URL")
+	if nodeServiceURL == "" {
+		nodeServiceURL = "http://node-api:3000/analyze-matrix"
+	}
 	resp, err := http.Post(nodeServiceURL, "application/json", bytes.NewBuffer(jsonPayload))
 	if err != nil {
 		return c.Status(fiber.StatusBadGateway).JSON(fiber.Map{
@@ -152,7 +156,11 @@ func main() {
 		},
 	}))
 	api.Post("/process-matrix", ProcessMatrixHandler)
-
-	log.Println("API en Go ejecutándose en el puerto 8080 con seguridad JWT y CORS")
-	log.Fatal(app.Listen(":8080"))
+	
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Printf("API en Go ejecutándose en el puerto %s con seguridad JWT y CORS", port)
+	log.Fatal(app.Listen(":" + port))
 }
